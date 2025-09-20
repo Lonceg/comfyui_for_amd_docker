@@ -27,11 +27,11 @@ amdgpu-install -y --usecase=graphics,rocm
 ```
 - if Workstation
 ```
-amdgpu-install -y --usecase=workstation,rocmhttps://hub.docker.com/r/lonceg/comfyui_for_amd
+amdgpu-install -y --usecase=workstation,rocm
 ```
 - if WSL
 ```
-amdgpu-install -y --usecase=rocm
+amdgpu-install -y --usecase=wsl,rocm --no-dkms
 ```
 - reboot
 
@@ -43,9 +43,13 @@ sudo usermod -a -G render,video $LOGNAME
 
 - Verify ROCm installation by running:  
 ```
-/opt/rocm/bin/rocminfo
-/opt/rocm/opencl/bin/clinfo
-```
+dkms status
+rocminfo
+clinfo
+```  
+
+Original instruction at: https://rocm.docs.amd.com/projects/radeon/en/latest/docs/install/native_linux/install-radeon.html
+
 - Install Docker engine:
 ```
 sudo apt install docker.io
@@ -58,7 +62,7 @@ sudo apt install docker.io
 sudo docker pull lonceg/comfyui_for_amd:rocm7.0_pytorch2.8_py3.12
 ```
 
-This is the link to the docker image on Docker Hub https://hub.docker.com/r/lonceg/comfyui_for_amd
+This is the link to the docker image on Docker Hub https://hub.docker.com/r/lonceg/comfyui_for_amd.
 Here is the original Docker image with PyTorch https://hub.docker.com/r/rocm/pytorch
 
 ---
@@ -103,6 +107,3 @@ You can close the running comfyui with ctrl+c. To close the container you can ty
   [ComfyUI-KJNodes](https://github.com/kijai/ComfyUI-KJNodes),
   [ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF),
   [ComfyUI-VideoHelperSuite](https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite)
-
----
-
