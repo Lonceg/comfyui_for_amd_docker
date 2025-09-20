@@ -39,6 +39,8 @@ amdgpu-install -y --usecase=rocm
 ```
 sudo usermod -a -G render,video $LOGNAME
 ```  
+- reboot
+
 - Verify ROCm installation by running:  
 ```
 /opt/rocm/bin/rocminfo
