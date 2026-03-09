@@ -56,10 +56,15 @@ sudo apt install docker.io
 ```
 
 ---
-
 ### Pulling the image
+
 ```
 sudo docker pull lonceg/comfyui_for_amd:rocm7.0_pytorch2.8_py3.12
+```
+### EDIT
+With new versions of ROCm I recommend to use the official ROCm docker image instead
+```
+sudo docker pull rocm/pytorch
 ```
 
 This is the link to the docker image on Docker Hub https://hub.docker.com/r/lonceg/comfyui_for_amd.
@@ -67,8 +72,56 @@ Here is the original Docker image with PyTorch https://hub.docker.com/r/rocm/pyt
 
 ---
 
+### Clone ComfyUI on hostOS (skip if you use my image)
+```
+cd ~
+git clone https://github.com/Comfy-Org/ComfyUI
+```
+
+Comment out those three and install requirements.txt
+```
+#torch
+#torchvision
+#torchaudio
+
+pip install -r requirements.txt
+```
+Or use this:
+```
+grep -v -E '^(torch|torchvision|torchaudio)' requirements.txt | xargs pip install --no-deps
+```
+
+### Clone addons for ComfyUI (skip if you use my image)
+```
+cd ~
+cd ComfyUI/custom_nodes
+git clone https://github.com/city96/ComfyUI-GGUF
+git clone https://github.com/rgthree/rgthree-comfy.git
+git clone https://github.com/kijai/ComfyUI-KJNodes
+git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite
+git clone https://github.com/MrForExample/ComfyUI-3D-Pack.git
+
+cd ComfyUI-GGUF
+pip install -r requirements.txt
+cd ..
+cd ComfyUI-KJNodes
+pip install -r requirements.txt
+cd ..
+cd ComfyUI-VideoHelperSuite
+pip install -r requirements.txt
+cd ..
+cd ..
+```
+
+---
+
 ### Running container
-Make sure to replace <b><u>username</b></u>
+Make sure to replace <b><u>username</b></u> and <b><u>image</b></u>
+
+image examples:
+  rocm/pytorch:rocm7.2_ubuntu24.04_py3.12_pytorch_release_2.8.0
+  
+  lonceg/comfyui_for_amd:rocm7.0_pytorch2.8_py3.12
 
 ```
 sudo docker run -it \
@@ -81,11 +134,32 @@ sudo docker run -it \
   --ipc=host \
   --shm-size 8G \
   -p 8188:8188 \
-  -v /home/<username>/comfyui_models:/workspace/ComfyUI/models \
-  lonceg/comfyui_for_amd:rocm7.0_pytorch2.8_py3.12
+  -v /home/<username>/ComfyUI:/workspace/ComfyUI \
+  -w /workspace/ComfyUI \
+  <image>
 ```
 
-With ```  -v /home/<username>/comfyui_models:/workspace/ComfyUI/models \``` line we map models folder inside the container to a volume ```/home/<username>/comfyui_models```. If you delete the container, make a new one, etc. these models will not disappear. The models should be placed within this volume just as in the original ComfyUI models folder here: https://github.com/comfyanonymous/ComfyUI/tree/master/models. You can also clone this repo and copy the folders as well
+---
+
+### Running container on WSL
+Make sure to replace <b><u>username</b></u>
+```
+sudo docker run -it \
+  --name comfy-rocm \
+  --cap-add=SYS_PTRACE \
+  --security-opt seccomp=unconfined \
+  --ipc=host \
+  --shm-size 8G \
+  -p 8188:8188 \
+  --device=/dev/dxg \
+  -v /usr/lib/wsl/lib/libdxcore.so:/usr/lib/libdxcore.so \
+  -v /opt/rocm/lib/libhsa-runtime64.so.1:/opt/rocm/lib/libhsa-runtime64.so.1 \
+  -v /home/<username>/ComfyUI:/workspace/ComfyUI \
+  -w /workspace/ComfyUI \
+  <image>
+```
+
+With ```  -v /home/<username>/ComfyUI:/workspace/ComfyUI \``` line we map models folder inside the container to a volume ```/home/<username>/ComfyUI```. If you delete the container, make a new one, etc. all downloaded models and custom nodes will not disappear. The models should be placed within this volume just as in the original ComfyUI models folder here: https://github.com/comfyanonymous/ComfyUI/tree/master/models. You can also clone this repo and copy the folders as well
 
 ### Running and closing existing container
 You can restart the container with 
